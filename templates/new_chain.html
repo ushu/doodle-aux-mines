@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Chaîne - Doodle aux Mines</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Commencer une nouvelle chaîne</h1>
+        
+        <div class="card">
+            <p>Vous êtes le premier joueur ! Écrivez une phrase ou une description pour commencer la chaîne.</p>
+            
+            <form action="/new-chain" method="POST" class="form">
+                <input type="hidden" name="player_name" value="{{ player_name }}">
+                
+                <div class="form-group">
+                    <label for="initial_text">Votre texte initial :</label>
+                    <textarea 
+                        name="initial_text" 
+                        id="initial_text" 
+                        required 
+                        placeholder="Ex: Un pingouin faisant du surf sur une vague géante..."
+                        class="form-control"
+                    ></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Créer la chaîne</button>
+                    <a href="/" class="btn btn-secondary">Retour</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique de la chaîne - Doodle aux Mines</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Historique de la chaîne</h1>
+        
+        <div class="chain-history">
+            {% for element in chain_elements %}
+                <div class="card history-card">
+                    <div class="element-header">
+                        <div class="element-info">
+                            <span class="element-number">#{{ element.order_number }}</span>
+                            <span class="element-player">par {{ element.player_name }}</span>
+                            {% if element.type == "text" %}
+                                <span class="text-badge">Texte</span>
+                            {% else %}
+                                <span class="drawing-badge">Dessin</span>
+                            {% endif %}
+                        </div>
+                        <time class="element-time" datetime="{{ element.created_at }}">
+                            {{ element.created_at }}
+                        </time>
+                    </div>
+                    
+                    <div class="element-content">
+                        {% if element.type == "text" %}
+                            <div class="text-content">
+                                {{ element.content }}
+                            </div>
+                        {% else %}
+                            <div class="drawing-content">
+                                <img src="{{ element.content }}" alt="Dessin #{{ element.order_number }}">
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn btn-secondary">Retour à l'accueil</a>
+        </div>
+    </div>
+</body>
+</html> 

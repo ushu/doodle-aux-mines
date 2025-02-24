@@ -1,0 +1,379 @@
+/* Variables globales */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #34495e;
+    --accent-color: #3498db;
+    --background-color: #ecf0f1;
+    --text-color: #2c3e50;
+    --border-radius: 8px;
+    --spacing: 20px;
+}
+
+/* Reset et styles de base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    padding: var(--spacing);
+}
+
+/* Layout */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing);
+}
+
+/* Cartes */
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: var(--spacing);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: var(--spacing);
+}
+
+/* Formulaires */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-control {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Boutons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Canvas de dessin */
+.canvas-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+#drawingCanvas {
+    border: 2px solid #ddd;
+    border-radius: var(--border-radius);
+    background: white;
+    cursor: crosshair;
+    width: 100%;
+    touch-action: none;
+}
+
+.canvas-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.control-group label {
+    font-size: 14px;
+    color: var(--secondary-color);
+}
+
+/* Contrôles de couleur */
+.color-presets {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+#colorPicker {
+    width: 40px;
+    height: 25px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Contrôle de la taille */
+#brushSize {
+    width: 100px;
+}
+
+#brushSizeValue {
+    font-size: 12px;
+    color: var(--secondary-color);
+    min-width: 40px;
+    text-align: right;
+}
+
+/* Contenu précédent */
+.previous-element {
+    margin-bottom: var(--spacing);
+}
+
+.text-content {
+    padding: 15px;
+    background: #f7f9fa;
+    border-radius: var(--border-radius);
+    font-size: 18px;
+}
+
+.drawing-content img {
+    max-width: 100%;
+    border-radius: var(--border-radius);
+}
+
+/* Titres */
+h1 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing);
+    font-size: 2.5em;
+}
+
+h2 {
+    color: var(--secondary-color);
+    margin-bottom: calc(var(--spacing) / 2);
+    font-size: 1.5em;
+}
+
+/* Badges */
+.text-badge, .drawing-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.text-badge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.drawing-badge {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+/* Welcome card */
+.welcome-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px var(--spacing);
+}
+
+.welcome-card p {
+    font-size: 18px;
+    margin: 0;
+}
+
+.welcome-card form {
+    margin: 0;
+}
+
+/* Chain cards */
+.chain-card {
+    transition: transform 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+}
+
+.chain-card:hover {
+    transform: translateY(-2px);
+}
+
+.drawing-preview {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.drawing-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.chain-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: calc(var(--spacing) / 2);
+    border-top: 1px solid #eee;
+}
+
+.chain-info p {
+    margin: 0;
+    color: var(--secondary-color);
+}
+
+/* Chain history */
+.chain-history {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+}
+
+.history-card {
+    padding: calc(var(--spacing) * 0.75);
+}
+
+.element-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: calc(var(--spacing) * 0.75);
+}
+
+.element-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.element-number {
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.element-player {
+    color: var(--secondary-color);
+}
+
+.element-time {
+    font-size: 14px;
+    color: #666;
+}
+
+.element-content {
+    margin-top: calc(var(--spacing) * 0.5);
+}
+
+.actions {
+    margin-top: var(--spacing);
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing);
+}
+
+.chain-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.chain-link:hover .chain-card {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Grid de dessins */
+.drawings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing);
+    margin-bottom: var(--spacing);
+}
+
+.chain-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+.chain-card {
+    height: 100%;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.drawing-preview {
+    flex: 1;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 0;
+}
+
+.drawing-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.chain-info {
+    padding-top: calc(var(--spacing) / 2);
+    border-top: 1px solid #eee;
+    font-size: 0.9em;
+} 

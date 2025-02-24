@@ -3,12 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doodle aux mines !</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
-    <script src="{{ url_for('static', path='script.js') }}"></script>
+    <title>Doodle aux Mines</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
 </head>
 <body>
-    <h1>Hello from doodle-aux-mines!</h1>
+    <div class="container">
+        <h1>Doodle aux Mines</h1>
+
+        {% if player_name %}
+            <div class="card welcome-card">
+                <p>Bienvenue, {{ player_name }} !</p>
+                <form action="/start-game" method="POST">
+                    <input type="hidden" name="player_name" value="{{ player_name }}">
+                    <button type="submit" class="btn btn-primary">Jouer</button>
+                </form>
+            </div>
+        {% else %}
+            <div class="card">
+                <form action="/start-game" method="POST" class="form">
+                    <div class="form-group">
+                        <label for="player_name">Votre nom :</label>
+                        <input 
+                            type="text" 
+                            name="player_name" 
+                            id="player_name" 
+                            required 
+                            class="form-control"
+                            placeholder="Entrez votre nom..."
+                        >
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Jouer</button>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+
+        {% if active_chains %}
+            <h2>Dessins à décrire</h2>
+            <div class="drawings-grid">
+                {% for chain in active_chains %}
+                    <a href="/chain/{{ chain.id }}" class="chain-link">
+                        <div class="card chain-card">
+                            <div class="drawing-preview">
+                                <img src="{{ chain.last_content }}" alt="Dernier dessin">
+                            </div>
+                            <div class="chain-info">
+                                <p>
+                                    {{ chain.players_count }} joueur{% if chain.players_count > 1 %}s{% endif %} 
+                                    • {{ chain.turns_count }} tour{% if chain.turns_count > 1 %}s{% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card">
+                <p>Aucun dessin à décrire pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
 </body>
 </html>

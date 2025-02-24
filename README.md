@@ -22,9 +22,12 @@ Ce projet est une réimplémentation du concept de Doodle or Die, développée a
    npx degit https://github.com/ushu/doodle-aux-mines
 
 2. Installer les dépendances
-   uv pip install -r requirements.txt
+   uv sync
 
-3. Lancer le serveur
+3. Créér la base
+   uv run db/seed.py
+
+4. Lancer le serveur de dev
    uv run fastapi dev main.py
 
 ## Technologies Utilisées

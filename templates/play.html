@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jouer - Doodle aux Mines</title>
+    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>À vous de jouer !</h1>
+        
+        <div class="card">
+            <div class="previous-element">
+                <h2>Élément précédent :</h2>
+                {% if last_type == "text" %}
+                    <div class="text-content">
+                        {{ last_content }}
+                    </div>
+                {% else %}
+                    <div class="drawing-content">
+                        <img src="{{ last_content }}" alt="Dessin précédent">
+                    </div>
+                {% endif %}
+            </div>
+            
+            <form action="/play/{{ chain_id }}" method="POST" class="form" id="playForm">
+                <input type="hidden" name="player_name" value="{{ player_name }}">
+                <input type="hidden" name="element_type" value="{{ expected_type }}">
+                <input type="hidden" name="content" id="contentInput">
+                
+                {% if expected_type == "text" %}
+                    <div class="form-group">
+                        <label for="textContent">Décrivez ce que vous voyez :</label>
+                        <textarea 
+                            id="textContent" 
+                            class="form-control"
+                            required 
+                            placeholder="Décrivez le dessin ci-dessus..."
+                        ></textarea>
+                    </div>
+                {% else %}
+                    <div class="form-group">
+                        <label>Dessinez ce qui est décrit ci-dessus :</label>
+                        <div class="canvas-container">
+                            <canvas id="drawingCanvas"></canvas>
+                            <div class="canvas-controls">
+                                <div class="control-group">
+                                    <label for="colorPicker">Couleur :</label>
+                                    <div class="color-presets">
+                                        <input type="color" id="colorPicker" value="#000000">
+                                    </div>
+                                </div>
+                                <div class="control-group">
+                                    <label for="brushSize">Taille :</label>
+                                    <input type="range" id="brushSize" min="1" max="50" value="5">
+                                    <span id="brushSizeValue">5px</span>
+                                </div>
+                                <button type="button" class="btn btn-secondary" id="clearCanvas">Effacer tout</button>
+                                <button type="button" class="btn btn-secondary" id="undoButton">Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Valider</button>
+                    <a href="/" class="btn btn-secondary">Abandonner</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if expected_type == "drawing" %}
+    <script>
+        const canvas = document.getElementById('drawingCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearButton = document.getElementById('clearCanvas');
+        const colorPicker = document.getElementById('colorPicker');
+        const brushSize = document.getElementById('brushSize');
+        const brushSizeValue = document.getElementById('brushSizeValue');
+        const undoButton = document.getElementById('undoButton');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let drawingStates = [];
+        let currentPath = [];
+
+        // Configuration de la taille du canvas
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const containerWidth = container.clientWidth;
+            canvas.width = containerWidth;
+            canvas.height = containerWidth * 0.6;
+            
+            // Restaurer le contexte après redimensionnement
+            ctx.strokeStyle = colorPicker.value;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = brushSize.value;
+        }
+
+        // Configuration initiale
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        saveDrawingState();
+
+        // Gestion du dessin
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            currentPath.push({ x, y });
+            [lastX, lastY] = [x, y];
+        }
+
+        function saveDrawingState() {
+            drawingStates.push(canvas.toDataURL());
+            if (drawingStates.length > 20) drawingStates.shift(); // Limite à 20 états
+        }
+
+        function undo() {
+            if (drawingStates.length > 1) {
+                drawingStates.pop(); // Retire l'état actuel
+                const img = new Image();
+                img.src = drawingStates[drawingStates.length - 1];
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                };
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        // Événements du canvas
+        canvas.addEventListener('mousedown', (e) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            lastX = (e.clientX - rect.left) * scaleX;
+            lastY = (e.clientY - rect.top) * scaleY;
+            currentPath = [{ x: lastX, y: lastY }];
+        });
+
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', () => {
+            if (isDrawing) {
+                isDrawing = false;
+                saveDrawingState();
+            }
+        });
+        canvas.addEventListener('mouseout', () => {
+            if (isDrawing) {
+                isDrawing = false;
+                saveDrawingState();
+            }
+        });
+
+        // Événements des contrôles
+        clearButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            saveDrawingState();
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            ctx.strokeStyle = e.target.value;
+        });
+
+        document.querySelectorAll('.color-preset').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const color = e.target.dataset.color;
+                colorPicker.value = color;
+                ctx.strokeStyle = color;
+            });
+        });
+
+        brushSize.addEventListener('input', (e) => {
+            ctx.lineWidth = e.target.value;
+            brushSizeValue.textContent = e.target.value + 'px';
+        });
+
+        undoButton.addEventListener('click', undo);
+
+        // Gestion de la soumission du formulaire
+        document.getElementById('playForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const contentInput = document.getElementById('contentInput');
+            if (canvas.toDataURL) {
+                contentInput.value = canvas.toDataURL();
+                e.target.submit();
+            }
+        });
+    </script>
+    {% else %}
+    <script>
+        // Gestion de la soumission du texte
+        document.getElementById('playForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const textContent = document.getElementById('textContent');
+            const contentInput = document.getElementById('contentInput');
+            contentInput.value = textContent.value;
+            e.target.submit();
+        });
+    </script>
+    {% endif %}
+</body>
+</html> 
