@@ -13,22 +13,29 @@ Ce projet est une réimplémentation du concept de Doodle or Die, développée a
 
 - Création de chaînes de dessins et descriptions
 - Interface de dessin interactive
-- Système d'authentification utilisateur
 - Stockage des dessins et des chaînes dans SQLite
 
 ## Installation
 
 1. Récupérer le code de l'exemple
+   ```bash
    npx degit https://github.com/ushu/doodle-aux-mines
+   ```
 
 2. Installer les dépendances
+   ```bash
    uv sync
+   ```
 
 3. Créér la base
+   ```bash
    uv run db/seed.py
+   ```
 
 4. Lancer le serveur de dev
+   ```bash
    uv run fastapi dev main.py
+   ```
 
 ## Technologies Utilisées
 

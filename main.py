@@ -13,6 +13,7 @@ from db.queries import (
     set_chain_active,
     get_chain_history
 )
+import random
 
 # Static files are handled by a specific sub-router 
 static = StaticFiles(directory="static")
@@ -39,18 +40,6 @@ async def home(request: Request):
     # Récupération des chaînes actives avec leur dernier élément
     active_chains = await get_active_chains(database)
     
-    # Conversion en dictionnaire pour correspondre au format attendu par le template
-    chains = [
-        {
-            "id": chain["id"],
-            "last_type": chain["last_type"],
-            "last_content": chain["last_content"],
-            "players_count": chain["players_count"],
-            "turns_count": chain["turns_count"]
-        }
-        for chain in active_chains
-    ]
-    
     # On récupère le nom du joueur depuis le cookie
     player_name = request.cookies.get("player_name")
     
@@ -58,18 +47,18 @@ async def home(request: Request):
         "index.html",
         {
             "request": request,
-            "active_chains": chains,
+            "active_chains": active_chains,
             "player_name": player_name
         }
     )
 
 @app.post("/start-game")
 async def start_game(request: Request, player_name: str = Form(...)):
-    # On essaie de récupérer une chaîne inactive
-    chain = await get_available_chain(database)
-    
-    # On crée une réponse
+    # Une chance sur 5 de créer une nouvelle chaîne (sans passer par get_available_chain)
+    chain = (await get_available_chain(database)) if random.random() < 0.8 else None
+
     if chain:
+        expected_type = "drawing" if chain["last_type"] == "text" else "text"
         response = templates.TemplateResponse(
             "play.html",
             {
@@ -78,7 +67,7 @@ async def start_game(request: Request, player_name: str = Form(...)):
                 "last_type": chain["last_type"],
                 "last_content": chain["last_content"],
                 "player_name": player_name,
-                "expected_type": "drawing" if chain["last_type"] == "text" else "text"
+                "expected_type": expected_type
             }
         )
     else:
@@ -99,13 +88,12 @@ async def start_game(request: Request, player_name: str = Form(...)):
 
 @app.post("/new-chain")
 async def create_chain(
-    request: Request,
     player_name: str = Form(...),
     initial_text: str = Form(...)
 ):
     # Création d'une nouvelle chaîne
     chain_id = await create_new_chain(database, player_name, initial_text)
-    return RedirectResponse(url="/", status_code=303)
+    return RedirectResponse(url=f"/chain/{chain_id}", status_code=303)
 
 @app.post("/play/{chain_id}")
 async def play_turn(
