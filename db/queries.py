@@ -1,6 +1,22 @@
 from typing import List, Dict, Any, Optional
 from databases import Database
 
+from db.models import Chain, ChainElement, AvailableChainInfo, ChainHistoryEntry, ChainInfoSummary
+
+async def get_chain_by_id(database: Database, chain_id: int) -> Optional[Chain]:
+    query = """
+    SELECT * FROM chains WHERE id = :chain_id
+    """
+    row = await database.fetch_one(query, {"chain_id": chain_id})
+    return Chain(**row) if row else None
+
+async def get_chain_element_by_id(database: Database, element_id: int) -> Optional[ChainElement]:
+    query = """
+    SELECT * FROM chain_elements WHERE id = :element_id
+    """
+    row = await database.fetch_one(query, {"element_id": element_id})
+    return ChainElement(**row) if row else None
+
 async def get_active_chains(database: Database) -> List[Dict[str, Any]]:
     """
     Récupère toutes les chaînes actives avec leur dernier élément, le nombre de joueurs
@@ -32,7 +48,8 @@ async def get_active_chains(database: Database) -> List[Dict[str, Any]]:
     GROUP BY c.id
     ORDER BY c.id DESC
     """
-    return await database.fetch_all(query)
+    rows = await database.fetch_all(query)
+    return [ChainInfoSummary(**row) for row in rows]
 
 async def get_available_chain(database: Database) -> Optional[Dict[str, Any]]:
     """
@@ -66,7 +83,7 @@ async def get_available_chain(database: Database) -> Optional[Dict[str, Any]]:
                 {"id": chain["id"]}
             )
             
-        return chain
+        return AvailableChainInfo(**chain)
 
 async def create_new_chain(database: Database, player_name: str, initial_text: str) -> int:
     """
@@ -79,16 +96,17 @@ async def create_new_chain(database: Database, player_name: str, initial_text: s
         )
         
         # Ajout du premier élément
-        await database.execute("""
+        chain_element = await database.execute("""
             INSERT INTO chain_elements (chain_id, order_number, content, type, player_name)
             VALUES (:chain_id, 1, :content, 'text', :player_name)
+            RETURNING *
         """, {
             "chain_id": chain_id,
             "content": initial_text,
             "player_name": player_name
         })
 
-        return chain_id
+        return ChainElement(**chain_element)
 
 async def add_chain_element(
     database: Database,
@@ -109,9 +127,10 @@ async def add_chain_element(
         """, {"chain_id": chain_id})
         
         # On ajoute le nouvel élément
-        await database.execute("""
+        chain_element = await database.execute("""
             INSERT INTO chain_elements (chain_id, order_number, content, type, player_name)
             VALUES (:chain_id, :order_number, :content, :type, :player_name)
+            RETURNING *
         """, {
             "chain_id": chain_id,
             "order_number": last_order + 1,
@@ -119,6 +138,8 @@ async def add_chain_element(
             "type": element_type,
             "player_name": player_name
         }) 
+    
+        return ChainElement(**chain_element)
 
 async def set_chain_active(database: Database, chain_id: int, is_active: bool) -> None:
         # On marque la chaîne comme inactive
@@ -142,4 +163,5 @@ async def get_chain_history(database: Database, chain_id: int) -> List[Dict[str,
     WHERE ce.chain_id = :chain_id
     ORDER BY ce.order_number ASC
     """
-    return await database.fetch_all(query, {"chain_id": chain_id})
+    rows = await database.fetch_all(query, {"chain_id": chain_id})
+    return [ChainHistoryEntry(**row) for row in rows]

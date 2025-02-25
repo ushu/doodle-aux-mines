@@ -1,10 +1,8 @@
 from contextlib import asynccontextmanager
-from databases import Database
 from fastapi import FastAPI, Request, Form, HTTPException, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pathlib import Path
 from db.queries import (
     get_active_chains,
     get_available_chain,
@@ -15,6 +13,7 @@ from db.queries import (
 )
 from config import Config
 import random
+from db import DB, database
 
 # ENV-loaded settings
 config = Config()
@@ -25,11 +24,9 @@ static = StaticFiles(directory="static")
 # We instanciate a template engine for jinja2
 templates = Jinja2Templates(directory="templates")
 
-# And set a database
-database = Database(config.database_url)
-
+# Connect/disconnect the database when the app starts/stops
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     await database.connect()
     yield
     await database.disconnect()
@@ -40,7 +37,7 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def home(request: Request, database: DB):
     # Récupération des chaînes actives avec leur dernier élément
     active_chains = await get_active_chains(database)
     
@@ -57,7 +54,7 @@ async def home(request: Request):
     )
 
 @app.post("/start-game")
-async def start_game(request: Request, player_name: str = Form(...)):
+async def start_game(request: Request, database: DB, player_name: str = Form(...)):
     # Une chance sur 5 de créer une nouvelle chaîne (sans passer par get_available_chain)
     chain = (await get_available_chain(database)) if random.random() < 0.8 else None
 

@@ -30,3 +30,4 @@ async def run_script(database: Database, script_path: str):
 
 if __name__ == "__main__":
     asyncio.run(seed(config.database_url))
+    asyncio.run(seed(config.test_database_url))

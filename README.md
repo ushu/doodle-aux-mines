@@ -43,6 +43,15 @@ Ce projet est une réimplémentation du concept de Doodle or Die, développée a
      uv run main.py
      ```
 
+## Lancer les tests
+
+Ce projet propose quelques tests simples (pour les requêtes en base) dans le répertoire `test/`.
+
+Pour les exécuter:
+```bash
+uv run pytest
+```
+
 ## Technologies Utilisées
 
 - Backend : FastAPI
