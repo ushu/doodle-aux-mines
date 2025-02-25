@@ -13,7 +13,11 @@ from db.queries import (
     set_chain_active,
     get_chain_history
 )
+from config import Config
 import random
+
+# ENV-loaded settings
+config = Config()
 
 # Static files are handled by a specific sub-router 
 static = StaticFiles(directory="static")
@@ -22,7 +26,7 @@ static = StaticFiles(directory="static")
 templates = Jinja2Templates(directory="templates")
 
 # And set a database
-database = Database('sqlite+aiosqlite:///example.db')
+database = Database(config.database_url)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -127,3 +131,7 @@ async def view_chain(request: Request, chain_id: int):
         "chain_history.html",
         {"request": request, "chain_elements": chain_elements}
     )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host=config.bind_host, port=config.port)

@@ -1,14 +1,22 @@
-import asyncio
-import os
-from databases import Database
 from pathlib import Path
+local_dir = Path(__file__).parent.absolute()
+root_dir = Path(__file__).parent.parent.absolute()
 
-dirname = os.path.dirname(__file__)
+# We hack the path to be able to import the config
+import sys
+sys.path.append(f"{root_dir}/")
+from config import Config
+
+# And at last, we can do the work 😅
+import asyncio
+from databases import Database
+
+config = Config()
 
 async def seed(database_url: str):
     database = Database(database_url)
     await database.connect()
-    await run_script(database, dirname + '/structure.sql')
+    await run_script(database, local_dir.joinpath('structure.sql'))
     await database.disconnect()
 
 async def run_script(database: Database, script_path: str):
@@ -21,4 +29,4 @@ async def run_script(database: Database, script_path: str):
             await database.execute(statement)
 
 if __name__ == "__main__":
-    asyncio.run(seed('sqlite+aiosqlite:///example.db'))
+    asyncio.run(seed(config.database_url))

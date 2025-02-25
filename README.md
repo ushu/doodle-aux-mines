@@ -32,10 +32,16 @@ Ce projet est une réimplémentation du concept de Doodle or Die, développée a
    uv run db/seed.py
    ```
 
-4. Lancer le serveur de dev
-   ```bash
-   uv run fastapi dev main.py
-   ```
+4. Lancer le serveur:
+
+   - en mode *dev*
+     ```bash
+     uv run fastapi dev main.py
+     ```
+   - en mode *prod*
+     ```bash
+     uv run main.py
+     ```
 
 ## Technologies Utilisées
 
